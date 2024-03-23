@@ -1,0 +1,48 @@
+version: '3'
+services:
+  jenkins:
+    container_name: jenkins_local
+    platform: linux/amd64
+#    image: ansible-jenkins
+    build:
+      context: ansible
+    ports:
+      - "8181:8080"
+    volumes:
+      - ./Jenkins_data:/var/jenkins_home
+      - ./applcation/.ssh/id_rsa:/home/root/.ssh/id_rsa
+      - ./applcation/.ssh/id_rsa.pub:/home/root/.ssh/id_rsa.pub
+    networks:
+      - jenkins
+  db_server:
+    container_name: db_server
+#    platform: linux/amd64
+    image: mysql
+    networks:
+      - jenkins
+    environment:
+      - "MYSQL_ROOT_PASSWORD=rakuten"
+    volumes:
+      - ./db_data:/var/lib/mysql
+  app_server:
+    container_name: app_server
+    platform: linux/amd64
+    image: app_server
+    build:
+      context: applcation
+    networks:
+      - jenkins
+  web:
+    container_name: web
+    platform: linux/amd64
+    image: ansible-web
+    build:
+      context: web
+    ports:
+      - "80:80"
+    volumes:
+      - ./web/src:/var/www/html/
+    networks:
+      - jenkins
+networks:
+  jenkins:

@@ -1,0 +1,29 @@
+docker run --privileged -itd -h "d-denki-biz-hv-back-office-$(hostname)" --name="denki-biz-hv-back-office" \
+-p 8081:81  \
+-v /etc/localtime:/etc/localtime \
+-v /usr/local/rms/evt.nfs/denki-biz:/usr/local/rms/evt.nfs/denki-biz \
+-v /usr/local/rms/evt.nfs/biz-energy:/usr/local/rms/evt.nfs/biz-energy \
+-v /usr/local/rms/evt/com:/usr/local/rms/evt/com \
+-v /usr/local/var/log/denki-biz-hv-back-office:/usr/local/var/log/biz-energy \
+-v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
+registry-jpe2.r-local.net/esdd-corp-devstg-hv-bo/denki-biz-hv-back-office-app:EN-23568 /etc/web_services.sh
+
+
+cp -a dockerfile/denki-biz-hv-back-office/denki-biz-hv-back-office-app/Dockerfile  app/Dockerfile
+
+echo -e "${RELEASE_BRANCH}\n$BUILD_USER_ID" > app/cakephp/app/config/header_version
+
+mkdir app/cakephp/app/tmp
+mkdir app/cakephp/app/logs
+
+chmod 775 -R app/cakephp/app/tmp
+chmod 775 -R app/cakephp/app/logs
+
+cd app
+
+process release branch to make a valid docker image tag
+IMAGE_TAG=`cut -d "/" -f 2 <<< $RELEASE_BRANCH`
+
+docker build --no-cache -t registry-jpe2.r-local.net/esdd-corp-devstg-hv-bo/denki-biz-hv-back-office-app:${IMAGE_TAG} .
+
+docker push registry-jpe2.r-local.net/esdd-corp-devstg-hv-bo/denki-biz-hv-back-office-app:${IMAGE_TAG}
