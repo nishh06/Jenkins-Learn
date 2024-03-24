@@ -1,0 +1,8 @@
+- hosts: web1
+  vars:
+    ansible_ssh_control_path: none
+  tasks:
+    - name: Transfer
+      template:
+        src: index.php
+        dest: /var/www/html/index.php
